@@ -106,9 +106,9 @@ export class AISdkClient extends LLMClient {
     const tools: Record<string, Tool> = {};
 
     for (const rawTool of options.tools) {
-      tools[rawTool.function.name] = {
-        description: rawTool.function.description,
-        inputSchema: rawTool.function.parameters,
+      tools[rawTool.name] = {
+        description: rawTool.description,
+        inputSchema: rawTool.parameters,
       } as Tool;
     }
 

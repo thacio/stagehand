@@ -309,9 +309,9 @@ export class CodeAssistClient extends LLMClient {
           ? [
               {
                 functionDeclarations: tools.map((t) => ({
-                  name: t.function.name,
-                  description: t.function.description,
-                  parameters: t.function.parameters,
+                  name: t.name,
+                  description: t.description,
+                  parameters: t.parameters,
                 })),
               },
             ]

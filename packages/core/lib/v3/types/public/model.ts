@@ -19,11 +19,9 @@ export type AnthropicJsonSchemaObject = {
 
 export interface LLMTool {
   type: "function";
-  function: {
-    name: string;
-    description: string;
-    parameters: Record<string, unknown>;
-  };
+  name: string;
+  description: string;
+  parameters: Record<string, unknown>;
 }
 
 export type AISDKProvider = (modelName: string) => LanguageModelV2;
