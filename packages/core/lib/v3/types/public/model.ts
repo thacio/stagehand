@@ -3,6 +3,9 @@ import type { LanguageModelV2 } from "@ai-sdk/provider";
 import type { ClientOptions as OpenAIClientOptions } from "openai";
 import type { AgentProviderType } from "./agent";
 
+// AUDITARIA: Import AuthClient type for OAuth support
+import type { AuthClient } from "google-auth-library";
+
 export type AnthropicJsonSchemaObject = {
   definitions?: {
     MySchema?: {
@@ -57,6 +60,10 @@ export type AvailableModel =
   | "gemini-2.0-flash"
   | "gemini-2.5-flash-preview-04-17"
   | "gemini-2.5-pro-preview-03-25"
+  // AUDITARIA: Added simplified Gemini 2.5 model names
+  | "gemini-2.5-flash"
+  | "gemini-2.5-flash-lite"
+  | "gemini-2.5-pro"
   | string;
 
 export type ModelProvider =
@@ -74,3 +81,11 @@ export type ClientOptions = (OpenAIClientOptions | AnthropicClientOptions) & {
 export type ModelConfiguration =
   | AvailableModel
   | (ClientOptions & { modelName: AvailableModel });
+
+// AUDITARIA: Google-specific client options supporting both API key and OAuth modes
+export interface GoogleClientOptions {
+  apiKey?: string;
+  authClient?: AuthClient;
+  project?: string;
+  location?: string;
+}

@@ -254,9 +254,13 @@ export class V3 {
       this.modelClientOptions = baseClientOptions;
       this.disableAPI = true;
     } else {
-      // Ensure API key is set
+
+      const hasAuthClient = !!(baseClientOptions as { authClient?: unknown })
+        .authClient; // AUDITARIA: Check if OAuth mode (authClient present) - skip API key loading
+
+      // Ensure API key is set (unless using OAuth)
       let apiKey = (baseClientOptions as { apiKey?: string }).apiKey;
-      if (!apiKey) {
+      if (!apiKey && !hasAuthClient) { // AUDITARIA_MODIFY
         try {
           apiKey = loadApiKeyFromEnv(
             this.modelName.split("/")[0], // "openai", "anthropic", etc
@@ -273,7 +277,7 @@ export class V3 {
       }
       this.modelClientOptions = {
         ...baseClientOptions,
-        apiKey,
+        ...(apiKey && { apiKey }), // Only include apiKey if it exists
       } as ClientOptions;
 
       // Get the default client for this model
@@ -363,7 +367,14 @@ export class V3 {
     } as ClientOptions;
 
     const providerKey = overrideProvider;
-    if (!(mergedOptions as { apiKey?: string }).apiKey) {
+    // AUDITARIA_MODIFY_START: Only try to load API key if not using OAuth
+    const hasAuthClientInMerged = !!(
+      mergedOptions as { authClient?: unknown }
+    ).authClient;
+    if (
+      !(mergedOptions as { apiKey?: string }).apiKey &&
+      !hasAuthClientInMerged
+    ) { // AUDITARIA_MODIFY_END
       const apiKey = loadApiKeyFromEnv(providerKey, this.logger);
       if (apiKey) {
         (mergedOptions as { apiKey?: string }).apiKey = apiKey;

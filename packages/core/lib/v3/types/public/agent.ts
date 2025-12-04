@@ -56,11 +56,32 @@ export type AgentStreamResult = StreamTextResult<ToolSet, never> & {
   result: Promise<AgentResult>;
 };
 
+/**
+ * Step update emitted during agent execution for live progress tracking
+ * AUDITARIA: Added for inline step display in CLI/web interface
+ */
+export interface AgentStepUpdate {
+  stepNumber: number;
+  actions: AgentAction[];
+  message: string;
+  completed: boolean;
+  currentUrl?: string;
+  usage?: {
+    input_tokens: number;
+    output_tokens: number;
+    inference_time_ms: number;
+  };
+}
+
 export interface AgentExecuteOptions {
   instruction: string;
   maxSteps?: number;
   page?: PlaywrightPage | PuppeteerPage | PatchrightPage | Page;
   highlightCursor?: boolean;
+  /** AUDITARIA: Callback for live step updates during agent execution */
+  onStep?: (step: AgentStepUpdate) => void;
+  /** AUDITARIA_FEATURE: Callback for pause/resume control - called at step boundaries */
+  checkPauseState?: () => Promise<void>;
 }
 export type AgentType = "openai" | "anthropic" | "google" | "microsoft";
 
@@ -82,6 +103,8 @@ export interface AgentExecutionOptions<
   options: TOptions;
   logger: (message: LogLine) => void;
   retries?: number;
+  /** AUDITARIA: Callback for live step updates during agent execution */
+  onStep?: (step: AgentStepUpdate) => void;
 }
 
 export interface AgentHandlerOptions {

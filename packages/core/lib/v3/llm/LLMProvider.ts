@@ -8,10 +8,12 @@ import {
   AvailableModel,
   ClientOptions,
   ModelProvider,
+  GoogleClientOptions,
 } from "../types/public/model";
 import { AISdkClient } from "./aisdk";
 import { AnthropicClient } from "./AnthropicClient";
 import { CerebrasClient } from "./CerebrasClient";
+import { CodeAssistClient } from "./CodeAssistClient";
 import { GoogleClient } from "./GoogleClient";
 import { GroqClient } from "./GroqClient";
 import { LLMClient } from "./LLMClient";
@@ -91,6 +93,10 @@ const modelToProviderMap: { [key in AvailableModel]: ModelProvider } = {
   "gemini-2.0-flash": "google",
   "gemini-2.5-flash-preview-04-17": "google",
   "gemini-2.5-pro-preview-03-25": "google",
+  // AUDITARIA: Added simplified Gemini 2.5 model names
+  "gemini-2.5-flash": "google",
+  "gemini-2.5-flash-lite": "google",
+  "gemini-2.5-pro": "google",
 };
 
 export function getAISDKLanguageModel(
@@ -187,6 +193,23 @@ export class LLMProvider {
           clientOptions,
         });
       case "google":
+        // AUDITARIA: Check for OAuth mode (authClient present)
+        const googleOpts = clientOptions as GoogleClientOptions | undefined;
+        if (googleOpts?.authClient && googleOpts?.project) {
+          this.logger({
+            category: "llm-provider",
+            message: "Using CodeAssistClient for OAuth authentication",
+            level: 1,
+          });
+          return new CodeAssistClient({
+            logger: this.logger,
+            modelName: availableModel,
+            authClient: googleOpts.authClient,
+            project: googleOpts.project,
+            location: googleOpts.location || "us-central1",
+          });
+        }
+        // Fall back to API key mode with GoogleClient
         return new GoogleClient({
           logger: this.logger,
           modelName: availableModel,
