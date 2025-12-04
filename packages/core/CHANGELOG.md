@@ -1,5 +1,13 @@
 # @browserbasehq/stagehand
 
+## 3.0.6
+
+### Patch Changes
+
+- [#1315](https://github.com/browserbase/stagehand/pull/1315) [`86975e7`](https://github.com/browserbase/stagehand/commit/86975e795db7505804949a267b20509bd16b5256) Thanks [@tkattkat](https://github.com/tkattkat)! - Add streaming support to agent through stream:true in the agent config
+
+- [#1304](https://github.com/browserbase/stagehand/pull/1304) [`d5e119b`](https://github.com/browserbase/stagehand/commit/d5e119be5eec84915a79f8d611b6ba0546f48c99) Thanks [@miguelg719](https://github.com/miguelg719)! - Add support for Microsoft's Fara-7B
+
 ## 3.0.4
 
 ### Patch Changes
