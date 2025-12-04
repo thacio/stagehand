@@ -178,6 +178,8 @@ describe("Stagehand public API types", () => {
       maxSteps?: number;
       page?: Stagehand.AnyPage;
       highlightCursor?: boolean;
+      onStep?: (update: Stagehand.AgentStepUpdate) => void;
+      checkPauseState?: () => Promise<void>;
     };
 
     it("matches expected type shape", () => {
@@ -190,6 +192,7 @@ describe("Stagehand public API types", () => {
       options: T;
       logger: (message: Stagehand.LogLine) => void;
       retries?: number;
+      onStep?: (update: Stagehand.AgentStepUpdate) => void;
     };
 
     it("matches expected type shape", () => {
