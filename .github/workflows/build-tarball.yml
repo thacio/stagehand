@@ -1,0 +1,64 @@
+name: Build Tarball Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (leave empty to use package.json version)'
+        required: false
+        default: ''
+      suffix:
+        description: 'Version suffix (e.g., -fork, -beta.1)'
+        required: false
+        default: '-fork'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and Release Tarball
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Get version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "tag=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            VERSION=$(node -p "require('./packages/core/package.json').version")
+            echo "tag=v${VERSION}${{ github.event.inputs.suffix }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Pack core package
+        run: |
+          cd packages/core
+          npm pack
+          mv *.tgz ../../stagehand-core.tgz
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
+          files: stagehand-core.tgz
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
