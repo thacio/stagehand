@@ -11,6 +11,7 @@ import {
 } from "ai";
 import { processMessages } from "../agent/utils/messageProcessing";
 import { LLMClient, ChatMessage, LLMResponse } from "../llm/LLMClient"; // AUDITARIA
+import { LLMTool } from "../types/public/model"; // AUDITARIA
 import {
   AgentExecuteOptions,
   AgentResult,
@@ -713,21 +714,12 @@ export class V3AgentHandler {
    * NOTE: AI SDK tool() returns objects with inputSchema (Zod), NOT parameters.
    * We must convert the Zod schema to JSON Schema using zodToJsonSchema().
    */
-  private convertToolsToLLMFormat(
-    tools: ToolSet,
-  ): Array<{
-    type: "function";
-    function: {
-      name: string;
-      description: string;
-      parameters: unknown;
-    };
-  }> {
+  private convertToolsToLLMFormat(tools: ToolSet): LLMTool[] {
     return Object.entries(tools).map(([name, tool]) => {
       // Convert Zod inputSchema to JSON Schema
       // tool.inputSchema is the Zod schema, tool.parameters is undefined in AI SDK
       const jsonSchema = tool.inputSchema
-        ? zodToJsonSchema(tool.inputSchema, { target: 'openApi3' })
+        ? zodToJsonSchema(tool.inputSchema as Parameters<typeof zodToJsonSchema>[0], { target: 'openApi3' })
         : { type: 'object', properties: {}, additionalProperties: false };
 
       const finalParameters = {
@@ -737,12 +729,9 @@ export class V3AgentHandler {
 
       return {
         type: "function" as const,
-        function: {
-          name,
-          description: tool.description || "",
-          // Ensure type is "object" at root level (spread jsonSchema, then override type)
-          parameters: finalParameters,
-        },
+        name,
+        description: tool.description || "",
+        parameters: finalParameters as Record<string, unknown>,
       };
     });
   } // AUDITARIA_END
