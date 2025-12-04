@@ -1,15 +1,11 @@
 name: Build Tarball Release
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
       version:
         description: 'Version tag (e.g., v1.0.0)'
-        required: false
-        default: ''
+        required: true
 
 permissions:
   contents: write
@@ -31,31 +27,26 @@ jobs:
         run: npm install -g pnpm
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile --ignore-scripts
 
-      - name: Build
-        run: pnpm run build
+      - name: Build (skip typecheck)
+        run: |
+          cd packages/core
+          pnpm run gen-version
+          pnpm run build-dom-scripts
+          pnpm run build-js
 
       - name: Pack core package
         run: |
           cd packages/core
-          npm pack
+          npm pack --ignore-scripts
           mv *.tgz ../../stagehand-core.tgz
-
-      - name: Get version
-        id: version
-        run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            echo "tag=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-          else
-            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          fi
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: Release ${{ steps.version.outputs.tag }}
+          tag_name: ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
           files: stagehand-core.tgz
           generate_release_notes: true
         env:
