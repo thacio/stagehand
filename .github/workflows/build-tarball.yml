@@ -26,28 +26,13 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
-      - name: Remove prepare scripts (skip typecheck)
-        run: |
-          # Remove prepare script from root to avoid turbo build
-          node -e "const p=require('./package.json'); delete p.scripts.prepare; require('fs').writeFileSync('package.json', JSON.stringify(p, null, 2))"
-          # Remove prepare script from packages/core to avoid running full build with typecheck
-          cd packages/core
-          node -e "const p=require('./package.json'); delete p.scripts.prepare; require('fs').writeFileSync('package.json', JSON.stringify(p, null, 2))"
-
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
-
-      - name: Build (skip typecheck)
-        run: |
-          cd packages/core
-          pnpm run gen-version
-          pnpm run build-dom-scripts
-          pnpm run build-js
 
       - name: Pack core package
         run: |
           cd packages/core
-          npm pack --ignore-scripts
+          npm pack
           mv *.tgz ../../stagehand-core.tgz
 
       - name: Create Release
