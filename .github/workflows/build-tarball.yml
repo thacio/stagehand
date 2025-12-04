@@ -26,8 +26,16 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
+      - name: Remove prepare scripts (skip typecheck)
+        run: |
+          # Remove prepare script from root to avoid turbo build
+          node -e "const p=require('./package.json'); delete p.scripts.prepare; require('fs').writeFileSync('package.json', JSON.stringify(p, null, 2))"
+          # Remove prepare script from packages/core to avoid running full build with typecheck
+          cd packages/core
+          node -e "const p=require('./package.json'); delete p.scripts.prepare; require('fs').writeFileSync('package.json', JSON.stringify(p, null, 2))"
+
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --ignore-scripts
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build (skip typecheck)
         run: |
