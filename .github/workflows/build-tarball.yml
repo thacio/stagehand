@@ -8,9 +8,9 @@ on:
         required: false
         default: ''
       suffix:
-        description: 'Version suffix (e.g., -fork, -beta.1)'
+        description: 'Version suffix (e.g., -beta.1, leave empty for none)'
         required: false
-        default: '-fork'
+        default: ''
 
 permissions:
   contents: write
