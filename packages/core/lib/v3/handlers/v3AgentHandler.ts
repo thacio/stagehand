@@ -486,7 +486,10 @@ export class V3AgentHandler {
             continue;
           }
 
-          const toolResult = await tool.execute(toolArgs, {});
+          const toolResult = await tool.execute(toolArgs, {
+            toolCallId: toolCall.id || `tool-${Date.now()}`,
+            messages: chatMessages as any,
+          });
 
           // Map tool result to actions
           const mappedActions = mapToolResultToActions({
